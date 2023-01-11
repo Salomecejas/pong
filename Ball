@@ -1,0 +1,36 @@
+extends CharacterBody2D
+var wait = 0.0
+func _physics_process(delta):
+	if wait > 0:
+		wait -= delta
+		visible = fmod(wait / 0.2, 1.0) > 0.5
+		return
+	visible = true
+	var collision = move_and_collide(velocity)# * (0.5 + (1 - position.x / 1280) * 1) )
+#	velocity.x -= delta * 5
+	if collision:
+		velocity = velocity.bounce(collision.get_normal())
+		move_and_collide(velocity.normalized() * 5)
+		velocity *= 1.05
+		velocity = velocity.rotated(randf_range(-0.2, 0.2))
+	
+	if position.x > 1150:
+		reset()
+		get_parent().player_1_score += 1
+		get_parent().update_scoretext()
+	if position.x < 0:
+		reset()
+		get_parent().player_2_score += 1
+		get_parent().update_scoretext()
+
+func reset(out = true):
+	velocity = Vector2(5,5).rotated(randf() * TAU) * 1.5
+	position = Vector2(1150, 640) / 2 + Vector2.RIGHT.rotated(randf() * TAU) * 100.0
+	wait = 1.0
+	if out and false:
+		var Ball = load("res://ball.tscn")
+		var ball = Ball.instantiate()
+		get_parent().add_child(ball)
+
+func _ready():
+	reset(false)
